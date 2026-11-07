@@ -1,16 +1,16 @@
 # Evaluating Transformer Training Strategies for Arabic–English Machine Translation
 
-This repository contains the experiments, evaluation artifacts, and manuscript materials for the study:
+This repository contains the experiments, prediction outputs, evaluation artifacts, and manuscript materials for the study:
 
 **Evaluating Transformer Training Strategies for Arabic-English Machine Translation: Effects of Pretraining, Tokenization, and Evaluation**
 
-The study compares training from scratch with pretrained multilingual and translation-specialized models for Arabic↔English machine translation using the OPUS-100 Arabic–English benchmark.
+The study compares scratch Transformer systems with pretrained multilingual and translation-specialized models for Arabic↔English machine translation using the OPUS-100 Arabic–English benchmark.
 
 ## Scope
 
-The revised study is intentionally limited to **Arabic–English machine translation**. It does not claim direct generalization to other morphologically rich languages.
+The revised study is limited to **Arabic–English machine translation**. It does not claim direct generalization to other morphologically rich languages.
 
-The experimental comparison covers:
+Systems evaluated include:
 
 - Scratch Transformer with character-level tokenization
 - Scratch Transformer with word-level tokenization
@@ -47,6 +47,8 @@ The test set contains 1,997 unique source-reference pairs and three repeated pai
 | System | Setting | BLEU | chrF | SBERT | COMET |
 |---|---|---:|---:|---:|---:|
 | Scratch Transformer | Character | 36.52 | 57.98 | 0.814 | 0.802 |
+| Scratch Transformer | Word | 23.50 | 48.50 | 0.705 | 0.710 |
+| Scratch Transformer | SentencePiece 32k | 8.57 | 25.39 | 0.529 | — |
 | MarianMT | Unadapted | 44.44 | 64.34 | 0.837 | 0.831 |
 | MarianMT | Fine-tuned | 43.47 | 63.37 | 0.835 | 0.828 |
 | mT5-base | Fine-tuned | 25.16 | 47.11 | 0.730 | — |
@@ -74,11 +76,11 @@ The test set contains 1,997 unique source-reference pairs and three repeated pai
 
 Under the evaluated scratch-Transformer settings and training budgets, character-level modeling performs substantially better than word-level and 32k SentencePiece tokenization in both directions.
 
-This result is specific to the evaluated setup and should **not** be interpreted as a universal claim that character-level tokenization is always superior.
+This result is specific to the evaluated setup and should not be interpreted as a universal claim that character-level tokenization is always superior.
 
 ## Statistical Significance
 
-Paired bootstrap resampling was performed with:
+Paired bootstrap resampling was performed using:
 
 - 1,000 bootstrap samples
 - seed 42
@@ -94,6 +96,10 @@ Fine-tuning effects are model-dependent:
 - NLLB-200 improves significantly for Arabic→English.
 - MarianMT slightly but significantly decreases for Arabic→English.
 - MarianMT shows no statistically significant change for English→Arabic.
+
+The complete significance results are available in:
+
+`analysis/significance/final_paired_bootstrap_significance.csv`
 
 ## Manual Evaluation
 
@@ -113,7 +119,11 @@ Overall adequacy / fluency scores:
 | mT5 fine-tuned | 3.42 | 3.99 |
 | NLLB-200 fine-tuned | 4.18 | 4.25 |
 
-The manual study uses a single Arabic-speaking evaluator. It is reported as a focused manual analysis rather than as a fully blinded multi-annotator preference study.
+The manual study uses a single Arabic-speaking evaluator. It is reported as a focused manual analysis rather than a fully blinded multi-annotator preference study.
+
+The final annotation workbook is available in:
+
+`analysis/human_evaluation/human_morphology_error_analysis_100_final.xlsx`
 
 ## Error Analysis
 
@@ -128,25 +138,98 @@ Lexical and omission errors are the most frequent observed failure types. Morpho
 ```text
 .
 ├── README.md
+├── REPRODUCIBILITY.md
+├── REPRO_ARTIFACT_CHECKLIST.md
 ├── LICENSE
+├── configs/
+│   └── final_experiment_config.yaml
 ├── paper/
 │   └── Evaluating_Transformer_Training_Strategies_FINAL_REVIEWER_ADDRESSED.docx
-└── analysis/
-    ├── significance/
-    │   └── final_paired_bootstrap_significance.csv
-    └── human_evaluation/
-        └── human_morphology_error_analysis_100_final.xlsx
+├── analysis/
+│   ├── significance/
+│   │   └── final_paired_bootstrap_significance.csv
+│   └── human_evaluation/
+│       └── human_morphology_error_analysis_100_final.xlsx
+├── scripts/
+│   ├── character/
+│   │   └── char_transformer_opus_full_experiment.py
+│   ├── main/
+│   │   └── Evaluating Transformer.ipynb
+│   └── sentencepiece/
+│       └── scratch SentencePiece baseline.ipynb
+└── predictions/
+    ├── ar_en/
+    └── en_ar/
 ```
 
-Additional training scripts, checkpoints, and sentence-level prediction files can be added under `experiments/` and `predictions/` as they are consolidated.
+## Prediction Files
+
+`predictions/ar_en/` contains sentence-level outputs for:
+
+- character scratch Transformer
+- word scratch Transformer
+- SentencePiece scratch Transformer
+- MarianMT unadapted and fine-tuned
+- mT5 fine-tuned
+- M2M-100 unadapted and fine-tuned
+- NLLB-200 unadapted and fine-tuned
+
+`predictions/en_ar/` contains sentence-level outputs for:
+
+- character scratch Transformer
+- word scratch Transformer
+- SentencePiece scratch Transformer
+- MarianMT unadapted and fine-tuned
+- mT5 fine-tuned
+- M2M-100 unadapted and fine-tuned
+- NLLB-200 fine-tuned
+
+The sentence-level unadapted NLLB-200 English→Arabic output was not available and is therefore not included. This is also why no paired unadapted-vs-fine-tuned NLLB-200 significance test is reported for that direction.
+
+## Experiment Sources
+
+The repository contains the original saved experiment sources that were available at the time of archival:
+
+- `scripts/main/Evaluating Transformer.ipynb`
+- `scripts/sentencepiece/scratch SentencePiece baseline.ipynb`
+- `scripts/character/char_transformer_opus_full_experiment.py`
+
+Some revision experiments were run interactively in Colab and were not preserved as standalone scripts. Their final configurations are documented in:
+
+`configs/final_experiment_config.yaml`
+
+No reconstructed scripts are presented as original experiment code.
+
+## Checkpoints
+
+Large model checkpoints are not committed to this GitHub repository.
+
+The repository instead provides:
+
+- experiment source files where available
+- exact final configurations
+- sentence-level predictions
+- statistical analysis outputs
+- human-evaluation annotations
+
+This keeps the repository lightweight while preserving the artifacts required to inspect and reproduce the reported evaluation.
 
 ## Important Experimental Notes
 
 - The original near-zero mT5 results were discarded after identifying an invalid training/evaluation run and were replaced with stable reruns.
 - mT5 is treated as a pretrained multilingual text-to-text model, not as a translation-specialized zero-shot MT system.
-- Pretrained-model comparisons are **system-level comparisons**. Model size, pretraining corpus size, and pretraining objective are not independently controlled.
+- Pretrained-model comparisons are system-level comparisons. Model size, pretraining corpus size, and pretraining objective are not independently controlled.
 - The current results are not based on three independent training runs; unsupported three-run averaging claims from the earlier manuscript were removed.
 - The NLLB-200 English→Arabic unadapted sentence-level output was unavailable for paired significance testing.
+- New prediction files preserve all 2,000 test rows, while legacy sentence-level outputs contain the 1,997 unique source-reference pairs.
+
+## Reproducibility
+
+See:
+
+- `REPRODUCIBILITY.md` for alignment and evaluation details.
+- `REPRO_ARTIFACT_CHECKLIST.md` for the artifact inventory.
+- `configs/final_experiment_config.yaml` for final experiment settings.
 
 ## License
 
