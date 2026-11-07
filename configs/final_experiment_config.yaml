@@ -1,0 +1,98 @@
+dataset:
+  name: OPUS-100 Arabic-English
+  train_pairs: 1000000
+  dev_pairs: 2000
+  test_rows: 2000
+  unique_test_pairs: 1997
+
+evaluation:
+  metrics:
+    - BLEU
+    - chrF
+    - SBERT
+    - COMET
+  paired_bootstrap:
+    samples: 1000
+    seed: 42
+    confidence_interval: 0.95
+    p_value: finite-sample-corrected two-sided empirical
+
+scratch_transformer:
+  encoder_layers: 6
+  decoder_layers: 6
+  d_model: 512
+  attention_heads: 8
+  feed_forward_dim: 2048
+  dropout: 0.1
+  max_length: 256
+  decoding:
+    beam_size: 4
+
+scratch_sentencepiece:
+  tokenizer: BPE
+  separate_ar_en_models: true
+  vocab_size: 32000
+  pad_id: 0
+  unk_id: 1
+  bos_id: 2
+  eos_id: 3
+  batch_size: 32
+  optimizer: AdamW
+  learning_rate: 0.0003
+  updates: 31250
+
+scratch_word_en_ar:
+  tokenizer: Unicode-aware regex word/punctuation
+  lowercase: false
+  vocab_source: train_only
+  max_vocab: 50000
+  min_frequency: 2
+  batch_size: 32
+  optimizer: Adam
+  beta1: 0.9
+  beta2: 0.98
+  eps: 1.0e-9
+  lr_schedule: inverse_sqrt
+  warmup_steps: 4000
+  updates: 31250
+
+mt5_base:
+  model: google/mt5-base
+  task_prefix: false
+  tokenizer: native SentencePiece
+  max_source_length: 256
+  max_target_length: 256
+  train_batch_size: 1
+  eval_batch_size: 2
+  gradient_accumulation_steps: 32
+  effective_batch_size: 32
+  gradient_checkpointing: true
+  learning_rate: 3.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.06
+  max_grad_norm: 1.0
+  precision: BF16
+  max_steps: 31250
+  eval_steps: 2500
+  save_steps: 2500
+  best_model_metric: eval_loss
+  seed: 42
+  data_seed: 42
+  beam_size: 4
+  transformers_version: 4.46.3
+
+manual_evaluation:
+  examples_total: 100
+  ar_en: 50
+  en_ar: 50
+  seed: 42
+  scale:
+    adequacy: 1-5
+    fluency: 1-5
+  systems:
+    A: character_scratch
+    B: sentencepiece_scratch
+    C: marianmt_finetuned
+    D: mt5_finetuned
+    E: nllb200_finetuned
+  note: single evaluator; not reported as a fully blinded multi-annotator study
