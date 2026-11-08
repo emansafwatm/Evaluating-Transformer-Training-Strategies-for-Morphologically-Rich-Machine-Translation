@@ -5,7 +5,7 @@ This repository contains the experiments, prediction outputs, evaluation artifac
 **Evaluating Transformer Training Strategies for Arabic-English Machine Translation: Effects of Pretraining, Tokenization, and Evaluation**
 
 The study compares scratch Transformer systems with pretrained multilingual and translation-specialized models for Arabic↔English machine translation using the OPUS-100 Arabic–English benchmark.
-
+The manuscript is currently under revision/submission and is not included in the public repository prior to publication.
 ## Scope
 
 The revised study is limited to **Arabic–English machine translation**. It does not claim direct generalization to other morphologically rich languages.
@@ -137,14 +137,13 @@ Lexical and omission errors are the most frequent observed failure types. Morpho
 
 ```text
 .
+.
 ├── README.md
 ├── REPRODUCIBILITY.md
 ├── REPRO_ARTIFACT_CHECKLIST.md
 ├── LICENSE
 ├── configs/
 │   └── final_experiment_config.yaml
-├── paper/
-│   └── Evaluating_Transformer_Training_Strategies_FINAL_REVIEWER_ADDRESSED.docx
 ├── analysis/
 │   ├── significance/
 │   │   └── final_paired_bootstrap_significance.csv
